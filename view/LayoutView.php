@@ -1,9 +1,10 @@
 <?php
 
+namespace view;
 
 class LayoutView {
   
-  public function render($isLoggedIn, LoginView $v, DateTimeView $dtv) {
+  public function render(LoginView $loginView, DateTimeView $dateTimeView) {
     echo '<!DOCTYPE html>
       <html>
         <head>
@@ -12,12 +13,12 @@ class LayoutView {
         </head>
         <body>
           <h1>Assignment 2</h1>
-          ' . $this->renderIsLoggedIn($isLoggedIn) . '
+          ' . $this->renderIsLoggedIn($this->isLoggedIn()) . '
           
           <div class="container">
-              ' . $v->response() . '
+              ' . $loginView->response() . '
               
-              ' . $dtv->show() . '
+              ' . $dateTimeView->show() . '
           </div>
          </body>
       </html>
@@ -31,5 +32,11 @@ class LayoutView {
     else {
       return '<h2>Not logged in</h2>';
     }
+  }
+
+  private function isLoggedIn()
+  {
+    //TODO : Implement function
+    throw new Exception ("The function ".__Function__." in the class ".get_class($this)." is not implemented yet.");
   }
 }

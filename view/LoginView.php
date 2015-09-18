@@ -1,5 +1,6 @@
 <?php
 
+namespace view;
 
 class LoginView {
 	private static $login = 'LoginView::Login';
@@ -48,6 +49,7 @@ class LoginView {
 	* @return  void, BUT writes to standard output!
 	*/
 	private function generateLoginFormHTML($message) {
+		
 		return '
 			<form method="post" > 
 				<fieldset>
@@ -71,6 +73,9 @@ class LoginView {
 	
 	//CREATE GET-FUNCTIONS TO FETCH REQUEST VARIABLES
 	private function getRequestUserName() {
+		
+		//TODO : Implement function
+		throw new Exception ("The function ".__Function__." in the class ".get_class($this)." is not implemented yet.");
 		//RETURN REQUEST VARIABLE: USERNAME
 	}
 	
