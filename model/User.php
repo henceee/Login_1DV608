@@ -1,12 +1,12 @@
 <?php
-namespace model;
+
 
 class User
 {
 	//TODO: change so that username is not hardcoded
-	private static $username = "Admin";
+	private $username;
 	//TODO: change so that password is not hardcoded
-	private static $password = "Password";
+	private $password;
 
 	function __construct($username,$password)
 	{

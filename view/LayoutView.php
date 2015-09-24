@@ -1,9 +1,10 @@
 <?php
 
-namespace view;
 
-class LayoutView {
-  
+class LayoutView
+{
+    private static $cookieName = 'LoginView::CookieName';
+
   public function render(LoginView $loginView, DateTimeView $dateTimeView) {
     echo '<!DOCTYPE html>
       <html>
@@ -16,7 +17,7 @@ class LayoutView {
           ' . $this->renderIsLoggedIn($this->isLoggedIn()) . '
           
           <div class="container">
-              ' . $loginView->response() . '
+              ' . $loginView->response($this->isLoggedIn()) . '
               
               ' . $dateTimeView->show() . '
           </div>
@@ -24,8 +25,13 @@ class LayoutView {
       </html>
     ';
   }
-  
-  private function renderIsLoggedIn($isLoggedIn) {
+  /**
+  * Generate HTML code depending on login-status
+  * @param bool $isLoggedIn
+  * @return  void
+  */
+  private function renderIsLoggedIn($isLoggedIn)
+  {
     if ($isLoggedIn) {
       return '<h2>Logged in</h2>';
     }
@@ -36,7 +42,6 @@ class LayoutView {
 
   private function isLoggedIn()
   {
-    //TODO : Implement function
-    throw new Exception ("The function ".__Function__." in the class ".get_class($this)." is not implemented yet.");
+    return isset($_SESSION['user']);      
   }
 }
