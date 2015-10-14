@@ -1,25 +1,28 @@
 <?php
 
-
+require_once('view/LoginView.php');
+require_once('model/Authenticate.php');
 
 class LoginController
 {
 
-
-	/**
-	 * @var null | \model\user
-	 */
-	private $user = null;
-	/**
-	 * @var null | \view\LoginView
-	 */
+	private static $msgError 	= 'error';
+	private static $msgSucess 	= 'sucess';
+	private static $msgMessage	= 'message';
+	private static $cookieName 	= 'LoginView::CookieName';
 	private $loginView = null;
+	private $isLoggedIn = false;
 
+	/**
+	 * @var null | \model\Login
+	 */
+	private $authenticate = null;
 
-	function __construct(User $user, LoginView $loginView)
-	{
-		$this->user = $user;
-		$this->loginView = $loginView;
+	function __construct($users,NavigationView $nav)
+	{	
+		$this->authenticate = new Authentication($users);
+		$this->loginView = new loginView($nav);		
+		$this->users = $users;		
 	}
 
 	/**
@@ -31,12 +34,14 @@ class LoginController
 	*/
 	public function doLogin()
 	{
+
 		$userNameCookie = $this->loginView->getUserNameCookie();
 		$passwordCookie = $this->loginView->getPasswordCookie();
 
+		
 		if(isset($userNameCookie) && isset($passwordCookie))
 		{
-			$this->tryTologin($userNameCookie,$passwordCookie,true);
+			$this->isLoggedIn=$this->authenticate->tryTologin($userNameCookie,$passwordCookie,true);
 		}
 
 		$reqUsername = $this->loginView->getRequestUserName();
@@ -44,74 +49,87 @@ class LoginController
 
 		if($this->loginView->userWantsToLogin())
 		{
-			$this->tryTologin($reqUsername,$reqPass);			
+			$this->isLoggedIn=$this->authenticate->tryTologin($reqUsername,$reqPass);			
 		}
 		/* 	Since logout operation requires session variable to be set, after authenticating
 		*	login details, It really should not matter if the message is still 'Bye bye'
 		*/
 		else if(isset($_SESSION['user']) && $this->loginView->userWantsToLogout())
 		{
-				$this->logout();
+				$this->authenticate->logout();
+				$this->isLoggedIn = false;				
 		}
+
 	}
 
 	/**
-	*	Checks inputted login-data against /model/User object	
-	*
-	*	@param string $username
-	* 	@param string $password
-	* 	@return  void
-	*/
-	private function tryTologin($username, $password, $cookie =false)
-	{
-		if($cookie)
-		{
-			$passFromUser =$this->user->getPassword();
-			if($this->user->getUsername() == $username && $password == md5($passFromUser))
-			{
-				$_SESSION['user'] = $username;
-			}
-		}
-
-		else if($this->authenticate($username,$password))
-		{
-			if(!isset($_SESSION['user']))
-			{
-				$_SESSION['user'] = $this->user->getUsername();	
-				
-			}
-		} 
-
+	 * Create response by setting to session
+	 *
+	 * @return  LoginView
+	 */
+	public function getOutput() {
 		
-	}
+		$this->isLoggedIn = isset($_SESSION['user']);
 
-	/**
-	*	Checks inputted login-data against /model/User object	
-	*
-	*	@param string $username
-	* 	@param string $password
-	* 	@return  bool
-	*/
-	private function authenticate($username,$password)
-	{
-		return $authentic = ($username == $this->user->getUsername() && $password == $this->user->getPassword() ? true : false);
+		if($this->loginView->userWantsToSave())
+		{
+			$this->loginView->getUserNameCookie();
+			$this->loginView->getPasswordCookie();
+		}
 
-	}
+		$reqPass 	 = $this->loginView->getRequestPassword();
+		$reqUserName = $this->loginView->getRequestUserName();
 
-	
-	/**
-	*	Unsets session index user, logging the user out.
-	*
-	*	@param string $username
-	* 	@param string $password
-	* 	@return  void
-	*/
-	public function logout()
-	{					
-			//unset the index 'user' of global arr. $_SESSION
-			unset($_SESSION['user']);
-			//end session
-			session_destroy();
-			ob_end_flush();
+		if(empty($Post))
+		{
+			$_SESSION[self::$msgSucess]  ="";
+			$_SESSION[self::$msgError] 	 ="";
+			$_SESSION[self::$msgMessage] ="";
+		}
+		if($this->loginView->userWantsToLogin() && !$this->isLoggedIn)
+		{
+
+			$_SESSION[self::$msgError] = array("Wrong name or password");
+		}
+					
+		if($this->loginView->userWantsToLogin())
+		{
+
+			if(empty($reqPass))
+			{
+				$_SESSION[self::$msgError] =array('Password is missing');
+			}
+			if(empty($reqUserName))
+			{
+				$_SESSION[self::$msgError] =array('Username is missing');
+			}	
+
+			if(isset($_COOKIE[self::$cookieName]))
+			{				
+				$_SESSION[self::$msgSucess] =array("Login with cookies. Hello again ".$_COOKIE[self::$cookieName].".");
+			
+			}
+
+		}
+
+		if($this->loginView->userHasInputtedName() && $this->loginView->userHasInputtedPassword())
+		{
+			if($this->loginView->userWantsToSave())
+			{
+				$this->loginView->getUserNameCookie();
+			}
+		}
+
+		if($this->loginView->userWantsToLogin() && $this->isLoggedIn)
+		{
+			$_SESSION[self::$msgSucess] = array('Welcome');
+		}
+
+		if($this->loginView->userWantsToLogout())
+		{			
+			$_SESSION[self::$msgMessage] =array("Bye bye!");
+		}
+		
+		return $this->loginView;
 	}
 }

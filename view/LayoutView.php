@@ -3,9 +3,16 @@
 
 class LayoutView
 {
-    private static $cookieName = 'LoginView::CookieName';
+  private static $cookieName = 'LoginView::CookieName';
 
-  public function render(LoginView $loginView, DateTimeView $dateTimeView) {
+
+  /**
+  * renders HTML output
+  * @param LoginView || RegView
+  * @param DateTimeView
+  * @return void
+  */
+  public function render($view, DateTimeView $dateTimeView) {
     echo '<!DOCTYPE html>
       <html>
         <head>
@@ -16,8 +23,8 @@ class LayoutView
           <h1>Assignment 2</h1>
           ' . $this->renderIsLoggedIn($this->isLoggedIn()) . '
           
-          <div class="container">
-              ' . $loginView->response($this->isLoggedIn()) . '
+          <div class="container">              
+              ' . $view->response . '
               
               ' . $dateTimeView->show() . '
           </div>
@@ -40,6 +47,10 @@ class LayoutView
     }
   }
 
+  /**
+  * Helper function to determine if user is logged in.
+  * @return bool
+  */
   private function isLoggedIn()
   {
     return isset($_SESSION['user']);      
